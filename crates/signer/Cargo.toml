@@ -1,0 +1,24 @@
+[package]
+name = "zark-signer"
+version = "0.1.0"
+edition = "2024"
+publish = false
+license = "MIT"
+
+[features]
+# Links the host-built cb-mpc library from scripts/build-cbmpc.sh.
+ecdsa-2p = ["dep:zark-spark-ecdsa-2p"]
+
+[dependencies]
+zark-protocol = { path = "../protocol" }
+anyhow = "1"
+k256 = { version = "0.13", features = ["arithmetic", "schnorr"] }
+hex = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+zeroize = "1"
+rusqlite = { version = "0.37", features = ["bundled"] }
+libc = "0.2"
+sha2 = "0.10"
+zark-spark-claim-mpc = { path = "../../integrations/spark/joint-claim" }
+zark-spark-ecdsa-2p = { path = "../../integrations/spark/ecdsa-2p", optional = true }

@@ -1,0 +1,57 @@
+/* Base shell and palette (Paper "zarkxspark", Ink / Paper). spark/styles.css lays out the screens. */
+:root {
+  --paper: #fff;
+  --ink: #000;
+  --muted: #696c65;
+  --line: #d2d4cd;
+  --control: #fff;
+  --fill: #f0f0f0;
+  --quiet: #f0f0f0;
+  --field: #f0f0f0;
+  --field-line: #c2c2c2;
+  --button-line: #c2c2c2;
+  --accent: #000;
+  --on-accent: #fff;
+  --danger: #a13816;
+  --danger-line: #bd7056;
+  --bill-shadow: rgba(0, 0, 0, 0.27);
+  --titlebar: 0px;
+  color-scheme: light;
+  font-family: "Figtree", system-ui, sans-serif;
+  font-size: 13px;
+  font-synthesis: none;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+body.spark-incognito {
+  --paper: #000;
+  --ink: #f0f0f0;
+  --muted: #c2c2c2;
+  --line: #454740;
+  --control: #101110;
+  --fill: #101110;
+  --quiet: #000;
+  --field: #000;
+  --field-line: #71746d;
+  --button-line: #666;
+  --accent: #b2d8c1;
+  --on-accent: #000;
+  --danger: #f5b49d;
+  color-scheme: dark;
+}
+body.platform-macos { --titlebar: 28px; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--paper); }
+body { overflow: hidden; cursor: default; -webkit-user-select: none; user-select: none; transition: background-color 320ms ease, color 320ms ease; }
+p, h1, h2 { margin: 0; }
+button { font: inherit; color: inherit; }
+.selectable, input, textarea { -webkit-user-select: text; user-select: text; cursor: text; }
+.drag-region { position: fixed; inset: 0 0 auto 0; height: var(--titlebar); z-index: 5; }
+#app { height: 100%; overflow: auto; }
+.icon { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.offscreen { position: fixed; left: -9999px; }
+:is(button, input, textarea):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { body { transition: none; } }

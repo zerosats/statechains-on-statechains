@@ -1,0 +1,12 @@
+[package]
+name = "spark_native_ordinary_exit_from_origin"
+type = "bin"
+authors = [""]
+compiler_version = ">=1.0.0"
+[dependencies]
+ordinary_native = { path = "../spark-native-ordinary-relations" }
+native = { path = "../spark-native-relations" }
+lineage = { path = "../spark-lineage-relations" }
+bitcoin_relations = { path = "../relations" }
+packing = { path = "../packing" }
+

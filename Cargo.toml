@@ -1,0 +1,9 @@
+[workspace]
+members = ["crates/protocol", "crates/signer"]
+exclude = ["integrations/spark/joint-claim", "integrations/spark/joint-claim/vendor/tandem", "integrations/spark/ecdsa-2p"]
+resolver = "3"
+
+# Joint identity MPC and its frame hashing are unusable unoptimized. Workspace
+# members keep the dev profile; dependencies retain debug assertions.
+[profile.dev.package."*"]
+opt-level = 3

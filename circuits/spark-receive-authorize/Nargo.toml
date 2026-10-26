@@ -1,0 +1,8 @@
+[package]
+name = "spark_receive_authorize"
+type = "bin"
+authors = [""]
+compiler_version = ">=1.0.0"
+[dependencies]
+packing = { path = "../packing" }
+receive = { path = "../spark-receive-relations" }

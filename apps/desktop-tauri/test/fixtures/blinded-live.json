@@ -1,0 +1,635 @@
+{
+ "source": "work/app-ui/live/record.mjs on new regtest network ui-1021a; raw runtime stdout before the Tauri projection",
+ "emptyRefresh": {
+  "id": "rec-1",
+  "progress": "",
+  "snapshot": {
+   "blinded": {
+    "activity": [],
+    "blocked": null,
+    "denominationSat": 64000,
+    "incognito": {
+     "address": "zark-regtest:e6b6ab3f7e2df25f7cc175c6a9c6e2d2ed7a7fdabbc3d7c8b6c9b92f606fae22",
+     "coins": [],
+     "incoming": [],
+     "totalSat": 0
+    },
+    "network": "ui-1021a",
+    "operation": null,
+    "profile": "alice",
+    "public": {
+     "address": "spark-regtest:038099ccfcda5f4fc2baf59f8368bbf6a98224b3b72a94c752301777406cca68e9",
+     "incoming": [],
+     "leaves": [],
+     "totalSat": 0
+    },
+    "status": "ready"
+   },
+   "connected": true
+  }
+ },
+ "errors": {
+  "amount": {
+   "request": {
+    "id": "rec-2",
+    "action": "preview",
+    "args": {
+     "side": "incognito",
+     "address": "zark-regtest:4ee67adb89619f3d47dca309d8216f324a65ffd7f419c85718b3f694694f1cde",
+     "amountSat": 2000
+    }
+   },
+   "event": {
+    "error": "Incognito holds cash bills. Move 10,000, 5,000 or 2,000 sats.",
+    "errorCode": "amount",
+    "id": "rec-2",
+    "progress": "",
+    "snapshot": {
+     "blinded": {
+      "activity": [],
+      "blocked": null,
+      "denominationSat": 64000,
+      "incognito": {
+       "address": "zark-regtest:e6b6ab3f7e2df25f7cc175c6a9c6e2d2ed7a7fdabbc3d7c8b6c9b92f606fae22",
+       "coins": [],
+       "incoming": [],
+       "totalSat": 0
+      },
+      "network": "ui-1021a",
+      "operation": null,
+      "profile": "alice",
+      "public": {
+       "address": "spark-regtest:038099ccfcda5f4fc2baf59f8368bbf6a98224b3b72a94c752301777406cca68e9",
+       "incoming": [],
+       "leaves": [],
+       "totalSat": 0
+      },
+      "status": "ready"
+     },
+     "connected": true
+    }
+   }
+  },
+  "invalid_address": {
+   "request": {
+    "id": "rec-3",
+    "action": "preview",
+    "args": {
+     "side": "incognito",
+     "address": "zark-regtest:e6b6ab3f7e2df25f7cc175c6a9c6e2d2ed7a7fdabbc3d7c8b6c9b92f606fae22",
+     "amountSat": 64000
+    }
+   },
+   "event": {
+    "error": "Use another wallet's address.",
+    "errorCode": "invalid_address",
+    "id": "rec-3",
+    "progress": "",
+    "snapshot": {
+     "blinded": {
+      "activity": [],
+      "blocked": null,
+      "denominationSat": 64000,
+      "incognito": {
+       "address": "zark-regtest:e6b6ab3f7e2df25f7cc175c6a9c6e2d2ed7a7fdabbc3d7c8b6c9b92f606fae22",
+       "coins": [],
+       "incoming": [],
+       "totalSat": 0
+      },
+      "network": "ui-1021a",
+      "operation": null,
+      "profile": "alice",
+      "public": {
+       "address": "spark-regtest:038099ccfcda5f4fc2baf59f8368bbf6a98224b3b72a94c752301777406cca68e9",
+       "incoming": [],
+       "leaves": [],
+       "totalSat": 0
+      },
+      "status": "ready"
+     },
+     "connected": true
+    }
+   }
+  },
+  "unknown_recipient": {
+   "request": {
+    "id": "rec-4",
+    "action": "preview",
+    "args": {
+     "side": "incognito",
+     "address": "zark-regtest:79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+     "amountSat": 64000
+    }
+   },
+   "event": {
+    "error": "No wallet on this regtest network uses that address.",
+    "errorCode": "unknown_recipient",
+    "id": "rec-4",
+    "progress": "",
+    "snapshot": {
+     "blinded": {
+      "activity": [],
+      "blocked": null,
+      "denominationSat": 64000,
+      "incognito": {
+       "address": "zark-regtest:e6b6ab3f7e2df25f7cc175c6a9c6e2d2ed7a7fdabbc3d7c8b6c9b92f606fae22",
+       "coins": [],
+       "incoming": [],
+       "totalSat": 0
+      },
+      "network": "ui-1021a",
+      "operation": null,
+      "profile": "alice",
+      "public": {
+       "address": "spark-regtest:038099ccfcda5f4fc2baf59f8368bbf6a98224b3b72a94c752301777406cca68e9",
+       "incoming": [],
+       "leaves": [],
+       "totalSat": 0
+      },
+      "status": "ready"
+     },
+     "connected": true
+    }
+   }
+  },
+  "no_coins": {
+   "request": {
+    "id": "rec-5",
+    "action": "preview",
+    "args": {
+     "side": "incognito",
+     "address": "zark-regtest:4ee67adb89619f3d47dca309d8216f324a65ffd7f419c85718b3f694694f1cde",
+     "amountSat": 64000
+    }
+   },
+   "event": {
+    "error": "No Incognito coin is available to send.",
+    "errorCode": "no_coins",
+    "id": "rec-5",
+    "progress": "",
+    "snapshot": {
+     "blinded": {
+      "activity": [],
+      "blocked": null,
+      "denominationSat": 64000,
+      "incognito": {
+       "address": "zark-regtest:e6b6ab3f7e2df25f7cc175c6a9c6e2d2ed7a7fdabbc3d7c8b6c9b92f606fae22",
+       "coins": [],
+       "incoming": [],
+       "totalSat": 0
+      },
+      "network": "ui-1021a",
+      "operation": null,
+      "profile": "alice",
+      "public": {
+       "address": "spark-regtest:038099ccfcda5f4fc2baf59f8368bbf6a98224b3b72a94c752301777406cca68e9",
+       "incoming": [],
+       "leaves": [],
+       "totalSat": 0
+      },
+      "status": "ready"
+     },
+     "connected": true
+    }
+   }
+  }
+ },
+ "stages": {
+  "publicDeposit": {
+   "progress": "Funding from the regtest faucet",
+   "stage": {
+    "count": 2,
+    "expectedMs": 3000,
+    "index": 0,
+    "label": "Funding from the regtest faucet",
+    "operation": "publicDeposit",
+    "step": "fund"
+   }
+  },
+  "goPrivate": {
+   "progress": "Proving receive",
+   "stage": {
+    "count": 7,
+    "expectedMs": 16000,
+    "index": 4,
+    "label": "Proving receive",
+    "operation": "goPrivate",
+    "step": "prove_receive"
+   }
+  },
+  "privateSend": {
+   "progress": "Proving ownership",
+   "stage": {
+    "count": 4,
+    "expectedMs": 9000,
+    "index": 1,
+    "label": "Proving ownership",
+    "operation": "privateSend",
+    "step": "prove_sender"
+   }
+  },
+  "claim": {
+   "progress": "Refreshing key shares",
+   "stage": {
+    "count": 5,
+    "expectedMs": 8000,
+    "index": 0,
+    "label": "Refreshing key shares",
+    "operation": "claim",
+    "step": "propose"
+   }
+  },
+  "publicClaim": {
+   "progress": "Claiming an incoming Spark payment",
+   "stage": {
+    "count": 1,
+    "expectedMs": 1000,
+    "index": 0,
+    "label": "Claiming an incoming Spark payment",
+    "operation": "publicClaim",
+    "step": "claim"
+   }
+  },
+  "goPublic": {
+   "progress": "Checking the coin",
+   "stage": {
+    "count": 7,
+    "expectedMs": 2000,
+    "index": 1,
+    "label": "Checking the coin",
+    "operation": "goPublic",
+    "step": "head"
+   }
+  }
+ },
+ "goPrivateReply": {
+  "id": "rec-7",
+  "progress": "",
+  "snapshot": {
+   "blinded": {
+    "activity": [
+     {
+      "amountSat": 64000,
+      "at": 1792584365808,
+      "counterparty": null,
+      "id": "go-private-869cd0c84388c9d6b40d1aaeda867f9d",
+      "kind": "goPrivate",
+      "label": "Moved to Incognito",
+      "side": "transition",
+      "state": "complete"
+     },
+     {
+      "amountSat": 64000,
+      "at": 1792584338776,
+      "counterparty": null,
+      "id": "deposit-666b48aa-d20d-4d2f-94b4-04d7a11de3d5",
+      "kind": "deposit",
+      "label": "Deposited to Public",
+      "side": "public",
+      "state": "complete"
+     }
+    ],
+    "blocked": null,
+    "denominationSat": 64000,
+    "incognito": {
+     "address": "zark-regtest:e6b6ab3f7e2df25f7cc175c6a9c6e2d2ed7a7fdabbc3d7c8b6c9b92f606fae22",
+     "coins": [
+      {
+       "amountSat": 64000,
+       "canGoPublic": true,
+       "canSend": true,
+       "id": "869cd0c84388c9d6b40d1aaeda867f9d",
+       "origin": "public",
+       "state": "available"
+      }
+     ],
+     "incoming": [],
+     "totalSat": 64000
+    },
+    "network": "ui-1021a",
+    "operation": null,
+    "profile": "alice",
+    "public": {
+     "address": "spark-regtest:038099ccfcda5f4fc2baf59f8368bbf6a98224b3b72a94c752301777406cca68e9",
+     "incoming": [],
+     "leaves": [],
+     "totalSat": 0
+    },
+    "status": "ready"
+   },
+   "connected": true
+  }
+ },
+ "previewReply": {
+  "request": {
+   "id": "rec-8",
+   "action": "preview",
+   "args": {
+    "side": "incognito",
+    "address": "zark-regtest:4ee67adb89619f3d47dca309d8216f324a65ffd7f419c85718b3f694694f1cde",
+    "coins": [
+     "869cd0c84388c9d6b40d1aaeda867f9d"
+    ]
+   }
+  },
+  "event": {
+   "id": "rec-8",
+   "preview": {
+    "amountSat": 64000,
+    "changeSat": 0,
+    "expectedMs": 17000,
+    "feeSat": 0,
+    "inputs": [
+     "869cd0c84388c9d6b40d1aaeda867f9d"
+    ],
+    "recipient": "bob",
+    "side": "incognito"
+   },
+   "progress": "",
+   "snapshot": {
+    "blinded": {
+     "activity": [
+      {
+       "amountSat": 64000,
+       "at": 1792584365808,
+       "counterparty": null,
+       "id": "go-private-869cd0c84388c9d6b40d1aaeda867f9d",
+       "kind": "goPrivate",
+       "label": "Moved to Incognito",
+       "side": "transition",
+       "state": "complete"
+      },
+      {
+       "amountSat": 64000,
+       "at": 1792584338776,
+       "counterparty": null,
+       "id": "deposit-666b48aa-d20d-4d2f-94b4-04d7a11de3d5",
+       "kind": "deposit",
+       "label": "Deposited to Public",
+       "side": "public",
+       "state": "complete"
+      }
+     ],
+     "blocked": null,
+     "denominationSat": 64000,
+     "incognito": {
+      "address": "zark-regtest:e6b6ab3f7e2df25f7cc175c6a9c6e2d2ed7a7fdabbc3d7c8b6c9b92f606fae22",
+      "coins": [
+       {
+        "amountSat": 64000,
+        "canGoPublic": true,
+        "canSend": true,
+        "id": "869cd0c84388c9d6b40d1aaeda867f9d",
+        "origin": "public",
+        "state": "available"
+       }
+      ],
+      "incoming": [],
+      "totalSat": 64000
+     },
+     "network": "ui-1021a",
+     "operation": null,
+     "profile": "alice",
+     "public": {
+      "address": "spark-regtest:038099ccfcda5f4fc2baf59f8368bbf6a98224b3b72a94c752301777406cca68e9",
+      "incoming": [],
+      "leaves": [],
+      "totalSat": 0
+     },
+     "status": "ready"
+    },
+    "connected": true
+   }
+  }
+ },
+ "backgroundSnapshot": {
+  "snapshot": {
+   "blinded": {
+    "activity": [],
+    "blocked": null,
+    "denominationSat": 64000,
+    "incognito": {
+     "address": "zark-regtest:4ee67adb89619f3d47dca309d8216f324a65ffd7f419c85718b3f694694f1cde",
+     "coins": [],
+     "incoming": [],
+     "totalSat": 0
+    },
+    "network": "ui-1021a",
+    "operation": null,
+    "profile": "bob",
+    "public": {
+     "address": "spark-regtest:02f77edda9dcf62521c878a40c35675b59ef3bfc0992ea57f0a4d45b035d989022",
+     "incoming": [],
+     "leaves": [],
+     "totalSat": 0
+    },
+    "status": "ready"
+   },
+   "connected": true
+  }
+ },
+ "requests": {
+  "refresh": {
+   "id": "rec-5",
+   "action": "refresh",
+   "args": {}
+  },
+  "preview": {
+   "id": "rec-11",
+   "action": "preview",
+   "args": {
+    "side": "public",
+    "address": "spark-regtest:02f77edda9dcf62521c878a40c35675b59ef3bfc0992ea57f0a4d45b035d989022",
+    "amountSat": 64000
+   }
+  },
+  "publicDeposit": {
+   "id": "rec-10",
+   "action": "publicDeposit",
+   "args": {
+    "amountSat": 64000
+   }
+  },
+  "goPrivate": {
+   "id": "rec-7",
+   "action": "goPrivate",
+   "args": {
+    "leaf": "666b48aa-d20d-4d2f-94b4-04d7a11de3d5"
+   }
+  },
+  "privateSend": {
+   "id": "rec-9",
+   "action": "privateSend",
+   "args": {
+    "address": "zark-regtest:4ee67adb89619f3d47dca309d8216f324a65ffd7f419c85718b3f694694f1cde",
+    "coins": [
+     "869cd0c84388c9d6b40d1aaeda867f9d"
+    ]
+   }
+  },
+  "publicSend": {
+   "id": "rec-12",
+   "action": "publicSend",
+   "args": {
+    "address": "spark-regtest:02f77edda9dcf62521c878a40c35675b59ef3bfc0992ea57f0a4d45b035d989022",
+    "amountSat": 64000
+   }
+  },
+  "goPublic": {
+   "id": "rec-4",
+   "action": "goPublic",
+   "args": {
+    "coin": "e962889375faf68fe7f053371acf5614"
+   }
+  }
+ },
+ "aliceFinal": {
+  "id": "rec-13",
+  "progress": "",
+  "snapshot": {
+   "blinded": {
+    "activity": [
+     {
+      "amountSat": 64000,
+      "at": 1792584396750,
+      "counterparty": "bob",
+      "id": "public-sent-e464d5c0-3472-4590-a375-ac201592cf2e",
+      "kind": "publicSent",
+      "label": "Sent payment",
+      "side": "public",
+      "state": "complete"
+     },
+     {
+      "amountSat": 64000,
+      "at": 1792584396030,
+      "counterparty": null,
+      "id": "deposit-df540ef8-8573-4997-a88e-ba0b26bcd37a",
+      "kind": "deposit",
+      "label": "Deposited to Public",
+      "side": "public",
+      "state": "complete"
+     },
+     {
+      "amountSat": 64000,
+      "at": 1792584378798,
+      "counterparty": "bob",
+      "id": "private-sent-869cd0c84388c9d6b40d1aaeda867f9d",
+      "kind": "privateSent",
+      "label": "Sent payment",
+      "side": "incognito",
+      "state": "complete"
+     },
+     {
+      "amountSat": 64000,
+      "at": 1792584365808,
+      "counterparty": null,
+      "id": "go-private-869cd0c84388c9d6b40d1aaeda867f9d",
+      "kind": "goPrivate",
+      "label": "Moved to Incognito",
+      "side": "transition",
+      "state": "complete"
+     },
+     {
+      "amountSat": 64000,
+      "at": 1792584338776,
+      "counterparty": null,
+      "id": "deposit-666b48aa-d20d-4d2f-94b4-04d7a11de3d5",
+      "kind": "deposit",
+      "label": "Deposited to Public",
+      "side": "public",
+      "state": "complete"
+     }
+    ],
+    "blocked": null,
+    "denominationSat": 64000,
+    "incognito": {
+     "address": "zark-regtest:e6b6ab3f7e2df25f7cc175c6a9c6e2d2ed7a7fdabbc3d7c8b6c9b92f606fae22",
+     "coins": [],
+     "incoming": [],
+     "totalSat": 0
+    },
+    "network": "ui-1021a",
+    "operation": null,
+    "profile": "alice",
+    "public": {
+     "address": "spark-regtest:038099ccfcda5f4fc2baf59f8368bbf6a98224b3b72a94c752301777406cca68e9",
+     "incoming": [],
+     "leaves": [],
+     "totalSat": 0
+    },
+    "status": "ready"
+   },
+   "connected": true
+  }
+ },
+ "bobFinal": {
+  "id": "rec-5",
+  "progress": "",
+  "snapshot": {
+   "blinded": {
+    "activity": [
+     {
+      "amountSat": 64000,
+      "at": 1792584402068,
+      "counterparty": null,
+      "id": "go-public-e962889375faf68fe7f053371acf5614",
+      "kind": "goPublic",
+      "label": "Moved to Public",
+      "side": "transition",
+      "state": "complete"
+     },
+     {
+      "amountSat": 64000,
+      "at": 1792584399020,
+      "counterparty": "alice",
+      "id": "public-received-e464d5c0-3472-4590-a375-ac201592cf2e",
+      "kind": "publicReceived",
+      "label": "Received payment",
+      "side": "public",
+      "state": "complete"
+     },
+     {
+      "amountSat": 64000,
+      "at": 1792584394661,
+      "counterparty": "alice",
+      "id": "private-received-e962889375faf68fe7f053371acf5614",
+      "kind": "privateReceived",
+      "label": "Received payment",
+      "side": "incognito",
+      "state": "complete"
+     }
+    ],
+    "blocked": null,
+    "denominationSat": 64000,
+    "incognito": {
+     "address": "zark-regtest:4ee67adb89619f3d47dca309d8216f324a65ffd7f419c85718b3f694694f1cde",
+     "coins": [],
+     "incoming": [],
+     "totalSat": 0
+    },
+    "network": "ui-1021a",
+    "operation": null,
+    "profile": "bob",
+    "public": {
+     "address": "spark-regtest:02f77edda9dcf62521c878a40c35675b59ef3bfc0992ea57f0a4d45b035d989022",
+     "incoming": [],
+     "leaves": [
+      {
+       "amountSat": 64000,
+       "available": true,
+       "id": "666b48aa-d20d-4d2f-94b4-04d7a11de3d5"
+      },
+      {
+       "amountSat": 64000,
+       "available": true,
+       "id": "df540ef8-8573-4997-a88e-ba0b26bcd37a"
+      }
+     ],
+     "totalSat": 128000
+    },
+    "status": "ready"
+   },
+   "connected": true
+  }
+ }
+}

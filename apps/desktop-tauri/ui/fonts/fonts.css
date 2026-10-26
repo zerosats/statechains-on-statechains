@@ -1,0 +1,23 @@
+/* Bundled (the webview CSP allows no remote fonts). Latin subsets; licenses
+   beside the files. */
+@font-face {
+  font-family: "Figtree";
+  src: url("Figtree.woff2") format("woff2");
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Archivo Black";
+  src: url("ArchivoBlack.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Roboto Mono";
+  src: url("RobotoMono.woff2") format("woff2");
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: block;
+}

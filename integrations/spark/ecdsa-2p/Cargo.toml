@@ -1,0 +1,19 @@
+[package]
+name = "zark-spark-ecdsa-2p"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+links = "cbmpc"
+
+[workspace]
+resolver = "3"
+
+[dependencies]
+anyhow = "1"
+k256 = { version = "0.13", features = ["arithmetic", "ecdsa"] }
+zeroize = "1"
+
+[build-dependencies]
+sha2 = "0.10"
+hex = "0.4"

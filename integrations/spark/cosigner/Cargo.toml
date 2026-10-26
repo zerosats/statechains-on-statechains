@@ -1,0 +1,45 @@
+[package]
+name = "zark-spark-cosigner"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+# Experimental Spark dependencies and ABI are separate from Bitcoin deployments.
+[workspace]
+
+[dependencies]
+anyhow = "1"
+aes = { version = "0.8", features = ["zeroize"] }
+aes-gcm = "0.10"
+bitcoin = "0.32"
+frost-secp256k1-tr = { git = "https://github.com/lightsparkdev/frost", rev = "997427e5c09e62459230ad711ef3a33fb64b9424" }
+frost-core = { git = "https://github.com/lightsparkdev/frost", rev = "997427e5c09e62459230ad711ef3a33fb64b9424" }
+hex = "0.4"
+hkdf = "0.12"
+k256 = { version = "0.13", features = ["arithmetic", "schnorr", "ecdh"] }
+libc = "0.2"
+rand = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+zeroize = { version = "1", features = ["derive"] }
+zark-protocol = { path = "../../../crates/protocol" }
+zark-spark-claim-mpc = { path = "../joint-claim" }
+zark-spark-ecdsa-2p = { path = "../ecdsa-2p", optional = true }
+
+[features]
+# cb-mpc ECDSA-2P entry identity; needs the prefix from scripts/build-cbmpc.sh.
+ecdsa-2p = ["dep:zark-spark-ecdsa-2p", "zark-signer/ecdsa-2p"]
+
+[dev-dependencies]
+# Read the unchanged SDK's retained public transaction JSON in explicit fixtures.
+bitcoin = { version = "0.32", features = ["serde"] }
+zark-signer = { path = "../../../crates/signer" }
+
+# Joint identity frames reach hundreds of megabytes. Garbling alone is not the
+# cost: SHA-256 frame addressing, serialization and the signer also run per
+# round, so every dependency is optimized for usable debug test builds. This
+# crate keeps the dev profile; dependencies retain debug assertions.
+[profile.dev.package."*"]
+opt-level = 3

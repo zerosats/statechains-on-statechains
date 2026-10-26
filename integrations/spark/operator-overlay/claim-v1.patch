@@ -1,0 +1,138 @@
+--- a/spark/so/handler/claim_transfer_flow_handler.go
++++ b/spark/so/handler/claim_transfer_flow_handler.go
+@@ -14,7 +14,6 @@
+ 
+ 	"entgo.io/ent/dialect/sql"
+ 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
+-	eciesgo "github.com/ecies/go/v2"
+ 	"github.com/google/uuid"
+ 	"github.com/lightsparkdev/spark/common"
+ 	"github.com/lightsparkdev/spark/common/keys"
+@@ -337,6 +336,10 @@
+ 	//     in-memory post-tweak key package; the durable keyshare apply waits for
+ 	//     Commit.
+ 	applied := isCommittedClaim(receiver)
++	if err := validateZarkClaimPrepare(h.config, parsed.transferID, parsed.ownerIDPK,
++		parsed.claimPackage, transferLeavesPre, applied); err != nil {
++		return nil, err
++	}
+ 
+ 	predictedOwnerByLeaf := make(map[string]keys.Public, len(parsed.claimPackage.GetLeavesToClaim()))
+ 	// tweaksByLeaf is only needed on the pre-apply path (Phase-1 lock + in-memory
+@@ -1541,14 +1544,9 @@
+ 	if len(coordinatorCipher) == 0 {
+ 		return nil, fmt.Errorf("no encrypted claim key tweaks found for SO %s", config.Identifier)
+ 	}
+-	decryptionPrivateKey := eciesgo.NewPrivateKeyFromBytes(config.IdentityPrivateKey.Serialize())
+-	decrypted, err := eciesgo.Decrypt(decryptionPrivateKey, coordinatorCipher)
+-	if err != nil {
+-		return nil, fmt.Errorf("unable to decrypt coordinator claim key tweaks: %w", err)
+-	}
+-	claimKeyTweaks := &pb.ClaimLeafKeyTweaks{}
+-	if err := proto.Unmarshal(decrypted, claimKeyTweaks); err != nil {
+-		return nil, fmt.Errorf("unable to unmarshal coordinator claim key tweaks: %w", err)
++	claimKeyTweaks, err := decryptClaimEnvelope(config, coordinatorCipher)
++	if err != nil {
++		return nil, err
+ 	}
+ 	out := make(map[string]*pb.ClaimLeafKeyTweak, len(claimKeyTweaks.GetLeavesToReceive()))
+ 	for _, leafTweak := range claimKeyTweaks.GetLeavesToReceive() {
+--- a/spark/so/handler/transfer_handler.go
++++ b/spark/so/handler/transfer_handler.go
+@@ -25,7 +25,6 @@
+ 	"go.uber.org/zap"
+ 
+ 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
+-	eciesgo "github.com/ecies/go/v2"
+ 	"github.com/google/uuid"
+ 	"github.com/lightsparkdev/spark/common"
+ 	bitcointransaction "github.com/lightsparkdev/spark/common/bitcoin_transaction"
+@@ -3107,6 +3106,9 @@
+ 		if !exists {
+ 			return fmt.Errorf("unexpected leaf id %s", leafIDString)
+ 		}
++		if err := zarkClaimRejectLegacyOverwrite(leaf.KeyTweak); err != nil {
++			return err
++		}
+ 		leafTweakBytes, err := proto.Marshal(leafTweak)
+ 		if err != nil {
+ 			return fmt.Errorf("unable to marshal leaf tweak: %w", err)
+@@ -3317,7 +3319,11 @@
+ 	// (SSP SyncTransfer repair, lightning HTLC checks, unilateral exit) see
+ 	// an unsigned tx as the leaf's canonical exit tx.
+ 	for _, leaf := range transferLeaves {
+-		_, err := leaf.Update().SetKeyTweak(nil).Save(ctx)
++		retained, err := zarkClaimRollbackTweak(leaf.KeyTweak)
++		if err != nil {
++			return err
++		}
++		_, err = leaf.Update().SetKeyTweak(retained).Save(ctx)
+ 		if err != nil {
+ 			return fmt.Errorf("unable to update leaf %v: %w", leaf.ID, err)
+ 		}
+@@ -4465,14 +4471,9 @@
+ 		if len(myCiphertext) == 0 {
+ 			return fmt.Errorf("no encrypted claim key tweaks found for SO %s", h.config.Identifier)
+ 		}
+-		decryptionPrivateKey := eciesgo.NewPrivateKeyFromBytes(h.config.IdentityPrivateKey.Serialize())
+-		decryptedKeyTweaks, err := eciesgo.Decrypt(decryptionPrivateKey, myCiphertext)
+-		if err != nil {
+-			return fmt.Errorf("unable to decrypt claim key tweaks: %w", err)
+-		}
+-		claimKeyTweaks := &pb.ClaimLeafKeyTweaks{}
+-		if err := proto.Unmarshal(decryptedKeyTweaks, claimKeyTweaks); err != nil {
+-			return fmt.Errorf("unable to unmarshal claim key tweaks: %w", err)
++		claimKeyTweaks, err := decryptClaimEnvelope(h.config, myCiphertext)
++		if err != nil {
++			return err
+ 		}
+ 
+ 		transferLeaves, err := getTransferLeavesForReceiverQuery(transfer, receiver).WithLeaf(func(tnq *ent.TreeNodeQuery) {
+@@ -4480,6 +4481,17 @@
+ 		}).All(ctx)
+ 		if err != nil {
+ 			return fmt.Errorf("unable to get transfer leaves for transfer %s: %w", transferID, err)
++		}
++		decodedClaim, err := validateZarkClaimContext(h.config, transferID, *receiverIdentityPublicKey,
++			req.GetEncryptedClaimKeyTweakPackage(), transferLeaves, false)
++		if err != nil {
++			return err
++		}
++		if decodedClaim != nil {
++			requested, err := keys.ParsePublicKey(req.GetUserPublicKeys()[decodedClaim.transcript.Claim.LeafID])
++			if err != nil || !requested.Equals(decodedClaim.public) {
++				return fmt.Errorf("Zark claim requested USER key changed")
++			}
+ 		}
+ 		if len(transferLeaves) != len(claimKeyTweaks.GetLeavesToReceive()) {
+ 			return fmt.Errorf("transfer has %d leaves but claim key tweaks has %d", len(transferLeaves), len(claimKeyTweaks.GetLeavesToReceive()))
+@@ -4889,7 +4901,17 @@
+ 				ownerSigningPubkey:  treeNode.VerifyingPubkey.Sub(tweakedKeyshare.PublicKey),
+ 				ownerIdentityPubkey: *receiverIdentityPublicKey,
+ 			})
+-			clearedIDs = append(clearedIDs, leaf.ID)
++			marker, err := zarkClaimAppliedMarker(p.keyTweak)
++			if err != nil {
++				return err
++			}
++			if marker != nil {
++				if _, err := leaf.Update().SetKeyTweak(marker).Save(ctx); err != nil {
++					return err
++				}
++			} else {
++				clearedIDs = append(clearedIDs, leaf.ID)
++			}
+ 		}
+ 
+ 		if err := applyTreeNodeOwnerKeyUpdates(ctx, db, transferID, updates, true); err != nil {
+--- a/spark/so/ent/transferleaf_extension.go
++++ b/spark/so/ent/transferleaf_extension.go
+@@ -29,7 +29,7 @@
+ 	signatureScheme := pbcommon.SignatureScheme(t.SignatureScheme)
+ 	if len(t.KeyTweak) != 0 {
+ 		leafKeyTweak := &pb.SendLeafKeyTweak{}
+-		if err = proto.Unmarshal(t.KeyTweak, leafKeyTweak); err == nil {
++		if err = proto.Unmarshal(t.KeyTweak, leafKeyTweak); err == nil && len(leafKeyTweak.GetSecretShareTweak().GetProofs()) > 0 {
+ 			keyTweakProof = leafKeyTweak.GetSecretShareTweak().GetProofs()[0]
+ 			if len(secretCipher) == 0 {
+ 				secretCipher = leafKeyTweak.GetSecretCipher()

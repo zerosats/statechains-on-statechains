@@ -1,0 +1,8 @@
+[package]
+name = "spark_auth_authorize"
+type = "bin"
+authors = [""]
+compiler_version = ">=1.0.0"
+[dependencies]
+packing = { path = "../packing" }
+auth = { path = "../spark-auth-relations" }

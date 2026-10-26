@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "open_ssp": {
+    "url": "https://github.com/benthecarman/open-ssp.git",
+    "commit": "89525792d65d7e0f7092e9f6d66b5082c00e48ca"
+  },
+  "submodules": {
+    "vendor/breez-sdk": "2472fdc0e136868eb10e5ad9f501a7e740080f04",
+    "vendor/ldk-server": "c31191ae6cf70b22b49473b2b435656fc3516ef9",
+    "vendor/spark": "5e0c879de2775f6a34aea6d3b0c455d065a3a70f"
+  }
+}

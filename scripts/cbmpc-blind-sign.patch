@@ -1,0 +1,299 @@
+Blind ECDSA-2P signing for Zark's Spark entry identity (applied by
+scripts/build-cbmpc.sh on top of the pinned cb-mpc commit; patch -p1).
+
+Why: the signer (P2) must not learn the joint Spark key P or the message m.
+The wallet (P1) keeps a secret tau, so cb-mpc's key is P' = P - tau*G, and P2
+signs m'' = m + r*tau, which is a valid signature of m under P. Upstream P1
+commits to the messages in message 1, before r exists, so m'' cannot be sent.
+
+What changes, in sign_batch_impl only when blind (single message, default mode):
+  - P1 commits to (R1, pi_1) only. Lindell17's commitment to R1 before R2 stays.
+  - After R = k1*R2, P1 computes m'' = m + r*tau mod q and sends it with
+    message 3. P2 rejects m'' outside [0, q).
+  - P2 uses m'' for its Paillier response in message 4 and in its ZK proof.
+  - P1 verifies P2's proof with m'' and the final signature against (P', m'').
+New entry points: ecdsa2pc::sign_blind, api::ecdsa_2p::sign_blind and
+cbmpc_ecdsa_2p_sign_blind. P2 passes an empty message and tau. Existing APIs
+and their behaviour are unchanged.
+
+Caller obligation: P2 must never answer two different m'' under one k2. Two
+answers reveal k2 and then P2's key share.
+
+--- a/include/cbmpc/api/ecdsa_2p.h
++++ b/include/cbmpc/api/ecdsa_2p.h
+@@ -34,6 +34,13 @@
+ // On any error, `sig_der` is cleared.
+ error_t sign(const coinbase::api::job_2p_t& job, mem_t key_blob, mem_t msg_hash, buf_t& sid, buf_t& sig_der);
+ 
++// Blind sign: P1 passes `msg_hash` and a 32-byte scalar `tau`; P2 passes both
++// empty and only sees m'' = m + r * tau. P1's signature is valid for
++// (key + tau * G, msg_hash). The signer must never answer two different m''
++// under one P2 nonce: two answers reveal the nonce and then P2's key share.
++error_t sign_blind(const coinbase::api::job_2p_t& job, mem_t key_blob, mem_t msg_hash, mem_t tau, buf_t& sid,
++                   buf_t& sig_der);
++
+ // Get the compressed public key from a key blob.
+ error_t get_public_key_compressed(mem_t key_blob, buf_t& pub_key);
+ 
+--- a/include/cbmpc/c_api/ecdsa_2p.h
++++ b/include/cbmpc/c_api/ecdsa_2p.h
+@@ -42,6 +42,13 @@
+ cbmpc_error_t cbmpc_ecdsa_2p_sign(const cbmpc_2pc_job_t* job, cmem_t key_blob, cmem_t msg_hash, cmem_t sid_in,
+                                   cmem_t* sid_out, cmem_t* sig_der_out);
+ 
++// Blind sign. P1 passes `msg_hash` and a 32-byte scalar `tau`; P2 passes both
++// as `{NULL, 0}` and only sees m'' = m + r * tau. P1's signature is valid for
++// (public key + tau * G, msg_hash). P2 must never answer two different m''
++// under one nonce: that reveals its key share.
++cbmpc_error_t cbmpc_ecdsa_2p_sign_blind(const cbmpc_2pc_job_t* job, cmem_t key_blob, cmem_t msg_hash, cmem_t tau,
++                                        cmem_t sid_in, cmem_t* sid_out, cmem_t* sig_der_out);
++
+ // Compute compressed public key for a key blob.
+ //
+ // Ownership:
+--- a/include-internal/cbmpc/internal/protocol/ecdsa_2p.h
++++ b/include-internal/cbmpc/internal/protocol/ecdsa_2p.h
+@@ -44,6 +44,14 @@
+                    std::vector<buf_t>& sigs);
+ 
+ /**
++ * Blind variant of `sign`: P1 passes the message hash m and a scalar tau; P2
++ * passes empty `msg` and `tau`. P2 signs m'' = m + r * tau, which P1 sends with
++ * message 3 after R is fixed. P1 returns a signature valid for (Q, m''), which
++ * is also valid for (Q + tau * G, m). P1 commits to (R1, pi_1) only.
++ */
++error_t sign_blind(job_2p_t& job, buf_t& sid, const key_t& key, const mem_t msg, const mem_t tau, buf_t& sig);
++
++/**
+  * @specs:
+  * - ecdsa-2pc-spec | ECDSA-2PC-Sign-2P
+  *
+--- a/src/cbmpc/api/ecdsa2pc.cpp
++++ b/src/cbmpc/api/ecdsa2pc.cpp
+@@ -179,6 +179,34 @@
+   return sign_common(&coinbase::mpc::ecdsa2pc::sign, job, key_blob, msg_hash, sid, sig_der);
+ }
+ 
++error_t sign_blind(const coinbase::api::job_2p_t& job, mem_t key_blob, mem_t msg_hash, mem_t tau, buf_t& sid,
++                   buf_t& sig_der) {
++  sig_der.free();
++  if (const error_t rv = validate_job_2p(job)) return rv;
++  if (const error_t rv = coinbase::api::detail::validate_mem_arg_max_size(key_blob, "key_blob",
++                                                                          coinbase::api::detail::MAX_OPAQUE_BLOB_SIZE))
++    return rv;
++  if (job.self == coinbase::api::party_2p_t::p1) {
++    if (const error_t rv = coinbase::api::detail::validate_mem_arg_max_size(
++            msg_hash, "msg_hash", coinbase::api::detail::MAX_MESSAGE_DIGEST_SIZE))
++      return rv;
++    if (const error_t rv = coinbase::api::detail::validate_mem_arg_max_size(
++            tau, "tau", coinbase::api::detail::MAX_MESSAGE_DIGEST_SIZE))
++      return rv;
++  } else if (msg_hash.size != 0 || tau.size != 0) {
++    return coinbase::error(E_BADARG, "P2 must not receive the blind message or tau");
++  }
++  coinbase::mpc::ecdsa2pc::key_t key;
++  error_t rv = deserialize_key_blob(key_blob, key);
++  if (rv) return rv;
++
++  const auto self = to_internal_party(job.self);
++  if (key.role != self) return coinbase::error(E_BADARG, "job.self mismatch key blob role");
++
++  coinbase::mpc::job_2p_t mpc_job = to_internal_job(job);
++  return coinbase::mpc::ecdsa2pc::sign_blind(mpc_job, sid, key, msg_hash, tau, sig_der);
++}
++
+ error_t get_public_key_compressed(mem_t key_blob, buf_t& pub_key) {
+   if (const error_t rv = coinbase::api::detail::validate_mem_arg_max_size(key_blob, "key_blob",
+                                                                           coinbase::api::detail::MAX_OPAQUE_BLOB_SIZE))
+--- a/src/cbmpc/c_api/ecdsa2pc.cpp
++++ b/src/cbmpc/c_api/ecdsa2pc.cpp
+@@ -145,6 +145,65 @@
+   return sign_common(&coinbase::api::ecdsa_2p::sign, job, key_blob, msg_hash, sid_in, sid_out, sig_der_out);
+ }
+ 
++cbmpc_error_t cbmpc_ecdsa_2p_sign_blind(const cbmpc_2pc_job_t* job, cmem_t key_blob, cmem_t msg_hash, cmem_t tau,
++                                        cmem_t sid_in, cmem_t* sid_out, cmem_t* sig_der_out) {
++  try {
++    if (sid_out) *sid_out = cmem_t{nullptr, 0};
++    if (!sig_der_out) return E_BADARG;
++    *sig_der_out = cmem_t{nullptr, 0};
++
++    const auto vjob = validate_2pc_job(job);
++    if (vjob) return vjob;
++    const auto vkb = validate_cmem(key_blob);
++    if (vkb) return vkb;
++    const auto vmh = validate_cmem(msg_hash);
++    if (vmh) return vmh;
++    const auto vtau = validate_cmem(tau);
++    if (vtau) return vtau;
++    const auto vsi = validate_cmem(sid_in);
++    if (vsi) return vsi;
++
++    coinbase::api::party_2p_t self_cpp;
++    const auto pconv = to_cpp_party(job->self, self_cpp);
++    if (pconv) return pconv;
++
++    job_2p_cpp_ctx_t ctx(job, self_cpp);
++    coinbase::buf_t sid(sid_in.data, sid_in.size);
++    coinbase::buf_t sig;
++
++    const coinbase::error_t rv = coinbase::api::ecdsa_2p::sign_blind(ctx.job, view_cmem(key_blob), view_cmem(msg_hash),
++                                                                     view_cmem(tau), sid, sig);
++    if (rv) return rv;
++
++    const auto r_sig = alloc_cmem_from_buf(sig, sig_der_out);
++    if (r_sig) return r_sig;
++
++    if (sid_out) {
++      const auto r_sid = alloc_cmem_from_buf(sid, sid_out);
++      if (r_sid) {
++        cbmpc_cmem_free(*sig_der_out);
++        *sig_der_out = cmem_t{nullptr, 0};
++        return r_sid;
++      }
++    }
++    return CBMPC_SUCCESS;
++  } catch (const std::bad_alloc&) {
++    if (sid_out) *sid_out = cmem_t{nullptr, 0};
++    if (sig_der_out) {
++      cbmpc_cmem_free(*sig_der_out);
++      *sig_der_out = cmem_t{nullptr, 0};
++    }
++    return E_INSUFFICIENT;
++  } catch (...) {
++    if (sid_out) *sid_out = cmem_t{nullptr, 0};
++    if (sig_der_out) {
++      cbmpc_cmem_free(*sig_der_out);
++      *sig_der_out = cmem_t{nullptr, 0};
++    }
++    return E_GENERAL;
++  }
++}
++
+ cbmpc_error_t cbmpc_ecdsa_2p_get_public_key_compressed(cmem_t key_blob, cmem_t* out_pub_key) {
+   try {
+     if (!out_pub_key) return E_BADARG;
+--- a/src/cbmpc/protocol/ecdsa_2p.cpp
++++ b/src/cbmpc/protocol/ecdsa_2p.cpp
+@@ -240,22 +240,29 @@
+   return SUCCESS;
+ }
+ 
++// `blind_tau` selects blind signing: P1 alone knows the message m and tau, and
++// P2 signs m'' = m + r * tau, sent by P1 with message 3 once r is fixed.
+ error_t sign_batch_impl(job_2p_t& job, buf_t& sid, const key_t& key, const std::vector<mem_t>& msgs, int sign_mode_flag,
+-                        std::vector<buf_t>& sigs) {
++                        std::vector<buf_t>& sigs, const bn_t* blind_tau = nullptr) {
+   sigs.clear();
+   error_t rv = UNINITIALIZED_ERROR;
+ 
+   bool global_abort_mode = sign_mode_flag == SIGN_MODE_GLOBAL_ABORT;
++  const bool blind = blind_tau != nullptr;
+ 
+   auto n_sigs = msgs.size();
+   if (n_sigs == 0) return coinbase::error(E_BADARG, "ecdsa_2p: empty batch");
++  if (blind && (n_sigs != 1 || global_abort_mode)) return coinbase::error(E_BADARG, "ecdsa_2p: blind sign is single");
+   const ecurve_t curve = key.curve;
+   const auto& G = curve.generator();
+   const mod_t& q = curve.order();
+ 
+   std::vector<bn_t> m(n_sigs);
+-  for (int i = 0; i < n_sigs; i++) {
+-    m[i] = curve_msg_to_bn(msgs[i], curve);
++  std::vector<bn_t> blind_m;
++  if (!blind || job.is_p1()) {
++    for (int i = 0; i < n_sigs; i++) {
++      m[i] = curve_msg_to_bn(msgs[i], curve);
++    }
+   }
+ 
+   if (sid.empty())
+@@ -278,7 +285,11 @@
+     }
+     pi_1.prove(R1, k1, sid, 1);
+     // Adding msgs here serves as a way of checking the consistency of the input messages.
+-    com.gen(msgs, R1, pi_1);
++    // Blind signing still commits R1 before R2 exists; only P1 knows the message.
++    if (blind)
++      com.gen(R1, pi_1);
++    else
++      com.gen(msgs, R1, pi_1);
+   }
+ 
+   if (rv = job.p1_to_p2(com.msg)) return rv;
+@@ -305,9 +316,29 @@
+     for (int i = 0; i < n_sigs; i++) {
+       R[i] = k1[i] * R2[i];
+     }
++    if (blind) {
++      blind_m.resize(n_sigs);
++      for (int i = 0; i < n_sigs; i++) {
++        const bn_t r_i = R[i].get_x() % q;
++        MODULO(q) { blind_m[i] = m[i] + r_i * *blind_tau; }
++        m[i] = blind_m[i];
++      }
++    }
+   }
+ 
+-  if (rv = job.p1_to_p2(com.rand, R1, pi_1)) return rv;
++  if (blind) {
++    if (rv = job.p1_to_p2(com.rand, R1, pi_1, blind_m)) return rv;
++    if (job.is_p2()) {
++      if (blind_m.size() != n_sigs) return coinbase::error(E_CRYPTO, "ecdsa_2p: inconsistent blind message");
++      for (int i = 0; i < n_sigs; i++) {
++        if (blind_m[i] < 0 || blind_m[i] >= q.value())
++          return coinbase::error(E_CRYPTO, "ecdsa_2p: blind message out of range");
++        m[i] = blind_m[i];
++      }
++    }
++  } else if (rv = job.p1_to_p2(com.rand, R1, pi_1)) {
++    return rv;
++  }
+ 
+   std::vector<bn_t> c(n_sigs);
+   std::vector<bn_t> r(n_sigs);
+@@ -316,7 +347,7 @@
+   // This is the step 4, taken from the section in the spec called ZK Proof of Correctness for Message 4 from P2 to P1
+   if (job.is_p2()) {
+     if (R1.size() != n_sigs) return coinbase::error(E_CRYPTO, "ecdsa_2p: inconsistent batch size (R1)");
+-    if (rv = com.open(msgs, R1, pi_1)) return rv;
++    if (rv = blind ? com.open(R1, pi_1) : com.open(msgs, R1, pi_1)) return rv;
+ 
+     for (int i = 0; i < n_sigs; i++) {
+       if (rv = curve.check(R1[i])) return coinbase::error(rv, "ecdsa_2p: R1 is not on the signing curve");
+@@ -405,7 +436,8 @@
+ 
+       // verify
+       crypto::ecc_pub_key_t ecc_verification_key(key.Q);
+-      if (rv = ecc_verification_key.verify(msgs[i], candidate_sigs[i]))
++      const buf_t signed_msg = blind ? m[i].to_bin(curve.size()) : buf_t(msgs[i]);
++      if (rv = ecc_verification_key.verify(signed_msg, candidate_sigs[i]))
+         if (global_abort_mode)
+           return coinbase::error(E_ECDSA_2P_BIT_LEAK, "signature verification failed");
+         else
+@@ -428,6 +460,25 @@
+   std::vector<mem_t> msgs(1, msg);
+   std::vector<buf_t> sigs;
+   if (rv = sign_batch(job, sid, key, msgs, sigs)) return rv;
++  sig = sigs[0];
++  return SUCCESS;
++}
++
++error_t sign_blind(job_2p_t& job, buf_t& sid, const key_t& key, const mem_t msg, const mem_t tau, buf_t& sig) {
++  sig.free();
++  error_t rv = UNINITIALIZED_ERROR;
++  const mod_t& q = key.curve.order();
++  bn_t t;
++  if (job.is_p1()) {
++    if (tau.size != key.curve.size()) return coinbase::error(E_BADARG, "ecdsa_2p: blind tau size");
++    t = bn_t::from_bin(tau);
++    if (t >= q.value()) return coinbase::error(E_BADARG, "ecdsa_2p: blind tau out of range");
++  } else if (msg.size != 0 || tau.size != 0) {
++    return coinbase::error(E_BADARG, "ecdsa_2p: P2 must not receive the blind message or tau");
++  }
++  std::vector<mem_t> msgs(1, msg);
++  std::vector<buf_t> sigs;
++  if (rv = sign_batch_impl(job, sid, key, msgs, SIGN_MODE_DEFAULT, sigs, &t)) return rv;
+   sig = sigs[0];
+   return SUCCESS;
+ }

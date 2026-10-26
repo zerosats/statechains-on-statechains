@@ -1,0 +1,194 @@
+/* Screens in the 760×814 design frame (Paper "zarkxspark", New design, styled
+   as Ink / Paper). Every piece is placed absolutely by page.js and art.js;
+   this sets its look. */
+.z-frame { border: 0; margin: 0; padding: 0; min-width: 0; }
+.z-stage { position: relative; width: 760px; height: 814px; margin: 0 auto; color: var(--ink); }
+.z-stage > *, .z-activity > li { position: absolute; margin: 0; }
+.z-activity { left: 0; top: 0; list-style: none; padding: 0; }
+
+/* Type */
+.z-title { display: flex; flex-direction: column; gap: 12px; text-align: center; }
+.z-title h1 { font: 700 36px/40px "Figtree", system-ui, sans-serif; letter-spacing: -0.035em; }
+.z-title p { font-size: 14px; line-height: 20px; color: var(--muted); }
+.z-note { font-size: 14px; line-height: 21px; color: var(--muted); }
+.z-note.danger { color: var(--danger); }
+.z-note.center { text-align: center; }
+.z-caption { font-size: 14px; line-height: 20px; color: var(--muted); text-align: center; }
+.z-footer { font-size: 10px; line-height: 16px; text-align: center; color: color-mix(in srgb, var(--muted) 70%, var(--paper)); }
+.z-eyebrow { display: flex; justify-content: space-between; font-size: 12px; line-height: 17px; color: var(--muted); }
+.z-eyebrow span:first-child { font-weight: 600; letter-spacing: 0.1em; }
+.z-section { font-size: 13px; line-height: 19px; color: var(--muted); }
+.z-empty { font: 700 28px/34px "Figtree", system-ui, sans-serif; letter-spacing: -0.035em; text-align: center; }
+
+.z-balance { display: flex; justify-content: center; align-items: baseline; gap: 10px; }
+.z-balance-value { font: 700 68px/68px "Figtree", system-ui, sans-serif; letter-spacing: -0.045em; }
+.z-balance-unit { font: 400 15px/18px "Figtree", system-ui, sans-serif; color: var(--muted); }
+.z-amount-label { display: block; margin-bottom: 9px; font-size: 13px; line-height: 19px; color: var(--muted); }
+.z-amount-line { display: flex; align-items: baseline; gap: 10px; }
+.z-amount-value { font: 700 56px/62px "Figtree", system-ui, sans-serif; letter-spacing: -0.04em; color: var(--ink); }
+.z-amount-unit { font-size: 14px; line-height: 20px; color: var(--muted); }
+.z-amount-sizer { display: inline-grid; max-width: 260px; }
+.z-amount-sizer::after { content: attr(data-value); grid-area: 1 / 1; visibility: hidden; white-space: pre; padding-right: 2px; }
+.z-amount-input {
+  grid-area: 1 / 1; width: 100%; min-width: 0; padding: 0; border: 0; background: none;
+  font: inherit; letter-spacing: inherit; color: inherit; caret-color: var(--accent);
+}
+.z-amount-input:focus-visible { outline: none; }
+.z-amount-input::placeholder { color: var(--line); }
+.z-row {
+  display: flex; justify-content: space-between; align-items: center; padding: 14px 0;
+  border-bottom: 1px solid var(--line); font-size: 14px; line-height: 20px;
+}
+.z-row span { color: var(--muted); }
+.z-row strong { font-weight: 500; }
+.z-summary { display: flex; justify-content: space-between; align-items: center; font-size: 14px; line-height: 20px; color: var(--muted); }
+.z-summary strong { font-size: 18px; line-height: 26px; font-weight: 600; color: var(--ink); }
+
+/* Controls */
+.z-circle {
+  width: 40px; height: 40px; padding: 0; border: 1px solid var(--line); border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; background: var(--control); color: var(--ink);
+}
+.z-toggle {
+  height: 40px; padding: 0; border: 1px solid var(--line); border-radius: 999px; background: var(--control);
+  font-size: 13px; font-weight: 500; line-height: 15.6px; color: var(--ink);
+}
+.z-toggle.on { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.spark-incognito .z-toggle:not(.on) { border-color: var(--field-line); color: var(--muted); }
+.z-action {
+  height: 44px; padding: 0 18px; border: 1px solid var(--accent); border-radius: 999px;
+  font-size: 15px; font-weight: 700; line-height: 22px; color: var(--on-accent); background: var(--accent);
+}
+.z-action.home { height: 40px; line-height: 18px; }
+.z-action.quiet, .z-action:disabled { border-color: var(--button-line); background: var(--quiet); color: var(--ink); }
+.z-action.quiet { font-weight: 600; }
+.z-action:disabled { color: var(--muted); }
+.z-link {
+  height: 22px; padding: 0; border: 0; background: none; display: flex; align-items: center; justify-content: center; gap: 7px;
+  font-size: 13px; line-height: 18px; color: var(--muted);
+}
+.z-link:disabled { opacity: 0.45; }
+.z-circle:disabled, .z-toggle:disabled:not(.on) { opacity: 0.45; }
+.z-handle {
+  height: 42px; padding: 0 14px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--button-line); border-radius: 999px;
+  background: var(--fill); font-size: 13px; line-height: 18px; color: var(--muted);
+}
+.z-field {
+  display: flex; flex-direction: column; gap: 8px; padding: 14px 18px; overflow: hidden;
+  border: 1px solid var(--field-line); border-radius: 16px; background: var(--field);
+}
+.z-field.ready { border-color: var(--accent); }
+.z-field.bad { border-color: var(--danger-line); }
+.z-field-label { font-size: 13px; line-height: 19px; color: var(--muted); }
+.z-field.bad .z-field-label { color: var(--danger); }
+.z-field-value, .z-address.filled { font: 400 13px/21px "Roboto Mono", ui-monospace, monospace; color: var(--ink); word-break: break-all; }
+.z-address {
+  flex: 1; width: 100%; min-height: 0; padding: 0; border: 0; resize: none; background: none; color: var(--ink);
+  font: 400 17px/24px "Figtree", system-ui, sans-serif;
+}
+.z-address::placeholder { color: var(--muted); }
+.z-address:focus-visible { outline: none; }
+.z-field:focus-within:not(.bad):not(.ready) { border-color: var(--ink); }
+.z-qr { height: 280px; padding: 16px; border-radius: 16px; background: #fff; }
+/* QR codes keep a white quiet zone in either mode for reliable scanning. */
+.z-qr img { display: block; width: 248px; height: 248px; image-rendering: pixelated; }
+
+/* Bills, cards and marks */
+.z-bill {
+  --lift: cubic-bezier(0.22, 1, 0.36, 1);
+  width: 277px; height: 156px; padding: 0; border: 0; border-radius: 3px; overflow: hidden;
+  z-index: var(--z); transform-origin: 0 0; background: none;
+  box-shadow: 0 -3px 10px var(--bill-shadow);
+  transition: translate 320ms var(--lift), box-shadow 320ms var(--lift), filter 200ms ease, z-index 320ms linear;
+}
+/* Raised at once on hover; on leave z-index steps back down only as the bill settles. */
+button.z-bill:is(:hover, :focus-visible):not(:disabled) {
+  z-index: 100; transition-property: translate, box-shadow, filter;
+  box-shadow: 0 -3px 10px var(--bill-shadow), 0 22px 34px -14px var(--bill-shadow);
+}
+.z-bill.under { opacity: 0; pointer-events: none; }
+.z-bill img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+/* The edge is drawn over the art, which runs to the bill's outer edge. */
+.z-bill::after { content: ""; position: absolute; inset: 0; border: 1px solid var(--edge, #c2c2c2); border-radius: inherit; pointer-events: none; }
+.z-bill.dark { --edge: #555; }
+/* Dimmed rather than faded, so overlapping bills never show through each other. */
+.z-bill.muted { filter: brightness(0.45) saturate(0.7); }
+button.z-bill:disabled:not([aria-pressed="true"]) { filter: brightness(0.55) saturate(0.7); }
+@media (hover: hover) { button.z-bill:hover:not(:disabled) { translate: 0 -8px; } }
+.z-bill-plain {
+  display: flex; flex-direction: column; justify-content: space-between; height: 100%; padding: 14px 16px; background: #f0f0f0;
+  color: #000; text-align: start; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.z-bill-plain strong { font: 400 32px/36px "Archivo Black", system-ui, sans-serif; letter-spacing: -0.055em; text-transform: none; }
+.z-mark {
+  width: 24px; height: 24px; padding: 0; border: 1px solid var(--field-line); border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; background: var(--field); color: var(--on-accent);
+}
+.z-mark.on { border-color: var(--accent); background: var(--accent); }
+.z-mark span { font-size: 11px; font-weight: 700; line-height: 1; }
+.z-count {
+  position: absolute; left: 12px; top: 12px; height: 22px; padding: 0 8px; border-radius: 999px;
+  background: rgba(0, 0, 0, 0.8); font-size: 12px; font-weight: 600; line-height: 22px; color: #f0f0f0;
+}
+.z-bill-plain + .z-count { left: auto; right: 12px; }
+.z-mark:disabled:not(.on) { opacity: 0.45; }
+.z-card {
+  border-radius: 13px; overflow: hidden;
+  background-position: 50%; background-size: cover; box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+.z-card-bitcoin { background-image: url("media/card-bitcoin.jpg"); }
+.z-card-lightning { background-image: url("media/card-lightning.jpg"); }
+.z-card-spark { background-image: url("media/card-spark.jpg"); }
+.z-card.single { border-radius: 14px; box-shadow: none; }
+.z-badge {
+  width: 44px; height: 44px; border: 4px solid var(--paper); border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; background: var(--accent); color: var(--on-accent);
+}
+.z-badge.large { width: 48px; height: 48px; border: 0; }
+.z-badge.pending .icon { animation: spin 1.1s linear infinite; }
+.z-blank {
+  left: 232px; top: 260px; width: 277px; height: 156px; border: 1px solid var(--line); border-radius: 3px;
+  transform-origin: 0 0; rotate: -4deg; background: var(--paper); display: flex; align-items: center; justify-content: center;
+}
+.z-blank.back { left: 244px; top: 280px; rotate: 4deg; background: var(--fill); }
+.z-add {
+  width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; background: var(--accent); color: var(--on-accent);
+}
+.z-add:disabled { opacity: 0.45; }
+
+/* Results: what was sent leaves, a received bill slots in, then the check and figures arrive. */
+.z-check {
+  width: 104px; height: 104px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent); color: var(--on-accent); animation: z-pop 560ms cubic-bezier(0.34, 1.56, 0.64, 1) 380ms backwards;
+}
+.z-result-amount { justify-content: center; }
+.z-reveal { animation: z-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0ms) backwards; }
+:is(.z-bill, .z-card).leaving { animation: z-leave 640ms cubic-bezier(0.55, 0, 0.75, 0.3) forwards; }
+.z-bill.arriving { animation: z-arrive 720ms cubic-bezier(0.22, 1, 0.36, 1) 320ms backwards; }
+@keyframes z-pop { from { scale: 0.4; opacity: 0; } }
+@keyframes z-rise { from { translate: 0 10px; opacity: 0; } }
+@keyframes z-leave { to { translate: 80px -760px; opacity: 0; } }
+@keyframes z-arrive { from { translate: 0 300px; opacity: 0; } }
+
+/* Activity */
+.z-activity-row { left: 220px; width: 320px; height: 82px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); }
+.z-activity-icon { width: 32px; height: 32px; flex: none; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--fill); }
+.z-activity-label, .z-activity-amount { display: flex; flex-direction: column; gap: 4px; flex: none; }
+.z-activity-label { width: 174px; }
+.z-activity-amount { width: 90px; align-items: flex-end; }
+.z-activity-label strong { font-size: 14px; font-weight: 500; line-height: 20px; }
+.z-activity-amount strong { font-size: 15px; font-weight: 600; line-height: 22px; }
+:is(.z-activity-label, .z-activity-amount) span { font-size: 12px; line-height: 17px; color: var(--muted); }
+
+/* Press feedback and motion */
+:is(.z-action, .z-circle, .z-toggle, .z-add, .z-mark) { transition: transform 160ms ease, opacity 160ms ease, background-color 200ms ease, border-color 200ms ease, color 200ms ease; }
+:is(.z-action, .z-circle, .z-toggle, .z-add):active:not(:disabled) { transform: scale(0.97); }
+@media (hover: hover) { :is(.z-action, .z-circle, .z-toggle, .z-add):hover:not(:disabled) { opacity: 0.82; } }
+.z-motion-layer { position: fixed; z-index: 20; margin: 0; background: transparent; pointer-events: none; }
+.z-flight { position: fixed; margin: 0; pointer-events: none; transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  :is(.z-action, .z-circle, .z-toggle, .z-add, .z-mark, .z-bill) { transition: none; }
+  .z-badge.pending .icon, .z-check, .z-reveal, .z-bill.arriving { animation: none; }
+  :is(.z-bill, .z-card).leaving { animation: none; visibility: hidden; }
+}

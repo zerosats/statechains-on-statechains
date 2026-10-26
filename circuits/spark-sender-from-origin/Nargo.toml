@@ -1,0 +1,12 @@
+[package]
+name = "spark_sender_from_origin"
+type = "bin"
+authors = [""]
+compiler_version = ">=1.0.0"
+[dependencies]
+lineage = { path = "../spark-lineage-relations" }
+spark = { path = "../spark-recovery-relations" }
+packing = { path = "../packing" }
+bitcoin_relations = { path = "../relations" }
+bigcurve = { path = "../vendor/noir_bigcurve" }
+bignum = { path = "../vendor/noir-bignum" }

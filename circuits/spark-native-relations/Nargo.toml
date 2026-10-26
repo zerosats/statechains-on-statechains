@@ -1,0 +1,13 @@
+[package]
+name = "spark_native_relations"
+type = "lib"
+authors = [""]
+compiler_version = ">=1.0.0"
+[dependencies]
+bitcoin_relations = { path = "../relations" }
+lineage = { path = "../spark-lineage-relations" }
+recovery = { path = "../private-recovery-relations" }
+bigcurve = { path = "../vendor/noir_bigcurve" }
+bignum = { path = "../vendor/noir-bignum" }
+fixed_generator = { path = "../fixed-generator" }
+
